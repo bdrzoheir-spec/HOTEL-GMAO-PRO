@@ -1,0 +1,62 @@
+
+name: Build HOTEL GMAO PRO APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Extract project
+        run: |
+          unzip -q HOTEL_GMAO_PRO_GitHub_APK.zip -d project
+
+      - name: Find project folder
+        run: |
+          PROJECT_DIR="$(dirname "$(find project -name package.json -not -path '*/node_modules/*' -print -quit)")"
+          if [ ! -f "$PROJECT_DIR/package.json" ]; then
+            echo "ERROR: package.json not found"
+            exit 1
+          fi
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          cd "$PROJECT_DIR"
+          npm install
+          npm install @capacitor/android@^7
+
+      - name: Build Android APK
+        run: |
+          cd "$PROJECT_DIR"
+          npx cap add android
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/app-debug.apk"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HOTEL-GMAO-PRO-APK
+          path: app-debug.apk
