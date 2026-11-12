@@ -181,7 +181,6 @@ fun saveCatalogs(context: Context, list: List<TechCatalog>) {
     context.getSharedPreferences("GMAO_DB", Context.MODE_PRIVATE)
         .edit().putString("catalogs", arr.toString()).apply()
 }
-
 fun loadCustomCatalogs(context: Context): List<TechCatalog> {
     val str = context.getSharedPreferences("GMAO_DB", Context.MODE_PRIVATE)
         .getString("catalogs", null) ?: return emptyList()
