@@ -1,6 +1,8 @@
 name: Build HOTEL GMAO PRO APK
 
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -9,10 +11,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Extract project files if zipped
+        run: |
+          if [ ! -f "gradlew" ] && ls *.zip 1> /dev/null 2>&1; then
+            unzip -n *.zip
+          fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Build APK
         run: |
@@ -24,4 +35,3 @@ jobs:
         with:
           name: HOTEL-GMAO-PRO-APK
           path: app/build/outputs/apk/debug/*.apk
-          
